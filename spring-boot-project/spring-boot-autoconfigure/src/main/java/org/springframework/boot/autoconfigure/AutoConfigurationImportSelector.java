@@ -94,8 +94,10 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 
 	private ConfigurationClassFilter configurationClassFilter;
 
+	// 告诉 SpringBoot 需要导入哪些组件
 	@Override
 	public String[] selectImports(AnnotationMetadata annotationMetadata) {
+		// 判断 @EnableAutoConfiguration 注解有没有开启（默认开启）
 		if (!isEnabled(annotationMetadata)) {
 			return NO_IMPORTS;
 		}
@@ -119,16 +121,35 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 	 * @return the auto-configurations that should be imported
 	 */
 	protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
+		// 判断是否开启注解
 		if (!isEnabled(annotationMetadata)) {
 			return EMPTY_ENTRY;
 		}
+		// 获取注解的属性
 		AnnotationAttributes attributes = getAttributes(annotationMetadata);
+		// 获取默认支持的自动配置类名列表
+		// 加载 classpath 下 \META-INF\spring\org.springframework.boot.autoconfigure.AutoConfiguration.imports 的类名
 		List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+		// 去除重复的配置类
 		configurations = removeDuplicates(configurations);
+		// 找到不希望自动配置的类
+		// 可以通过 @EnableAutoConfiguration 的exclude/excludeName 属性进行配置
+		// 或者通过配置文件中的 spring.autoconfigure.exclude 进行配置
 		Set<String> exclusions = getExclusions(annotationMetadata, attributes);
+		// 校验排除类 必须是自动配置类，否则抛出异常
 		checkExcludedClasses(configurations, exclusions);
+		// 从configurations中移除不希望自动配置的类
 		configurations.removeAll(exclusions);
+		// 对所有的自动配置类进行筛选，根据项目 pom.xml 中加入的依赖文件筛选出最终符合当前项目运行环境对应的自动配置类
+		// 判断是否要加载某个类的两种方式
+		// 1. 根据 spring-autoconfigure-metadata.properties 进行判断
+		// 2. 根据 @ConditionalXXX 是否满足
+		// 如：@ConditionalOnClass({SqSessionFactory.class,SqlSessionFactoryBean.class}) 表示需要再类路径中存在SqSessionFactory.class,SqlSessionFactoryBean.class 时才能完成自动注册
 		configurations = getConfigurationClassFilter().filter(configurations);
+
+		// 将自动配置导入时间通知监听器
+		// 当 AutoConfigurationImportSelector过滤完成后会自动加载类路径下 META-INF\spring.factories 文件中的 AutoConfigurationImportListener 的实现类
+		// 并触发下边的事件
 		fireAutoConfigurationImportEvents(configurations, exclusions);
 		return new AutoConfigurationEntry(configurations, exclusions);
 	}
