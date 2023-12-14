@@ -78,8 +78,8 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@AutoConfigurationPackage
-@Import(AutoConfigurationImportSelector.class)
+@AutoConfigurationPackage // 自动配置包 会把 @SpringBootApplication 注解标注的类所在的包名拿到，并对该包及其子包进行扫描，将组件添加到容器中
+@Import(AutoConfigurationImportSelector.class) // 可以帮助 spring boot 应用将所有符合条件的 @Configuration 配置都加载到当前 spring boot 创建并视同的IoC容器中
 public @interface EnableAutoConfiguration {
 
 	/**

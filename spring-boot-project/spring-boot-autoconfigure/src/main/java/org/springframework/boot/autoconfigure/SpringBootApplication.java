@@ -48,12 +48,12 @@ import org.springframework.data.repository.Repository;
  * @author Andy Wilkinson
  * @since 1.2.0
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE) // 表示该注解可以用在类、接口（包括注解）枚举或者记录声明上
+@Retention(RetentionPolicy.RUNTIME) // 表示该注解的生命周期，runtime表示运行时
 @Documented
-@Inherited
-@SpringBootConfiguration
-@EnableAutoConfiguration
+@Inherited // 表示该注解可以被继承
+@SpringBootConfiguration // 表示该类是一个配置类
+@EnableAutoConfiguration // 表示启用 Spring 应用程序上下文的自动配置
 @ComponentScan(excludeFilters = { @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
 		@Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
 public @interface SpringBootApplication {

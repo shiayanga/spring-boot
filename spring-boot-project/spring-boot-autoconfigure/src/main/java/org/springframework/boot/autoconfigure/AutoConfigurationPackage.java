@@ -38,7 +38,8 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(AutoConfigurationPackages.Registrar.class)
+// @Import 是 Spring 框架的底层注解，它的作用就是给容器中导入某个组件类
+@Import(AutoConfigurationPackages.Registrar.class) // 默认将主配置类 @SpringBootApplication 注解所在的包及其子包里面的所有组件扫描到 spring 容器中
 public @interface AutoConfigurationPackage {
 
 	/**

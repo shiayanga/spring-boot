@@ -122,9 +122,14 @@ public abstract class AutoConfigurationPackages {
 	 * configuration.
 	 */
 	static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImports {
-
+		/**
+		 * 获取到的是项目主程序启动类所在的目录
+		 * @param metadata 注解标注的元数据信息
+		 * @param registry current bean definition registry
+		 */
 		@Override
 		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+			// 默认将会扫描 @SpringBootApplication 标注的主配置类所在的包及其子包下所有组件
 			register(registry, new PackageImports(metadata).getPackageNames().toArray(new String[0]));
 		}
 
@@ -140,18 +145,24 @@ public abstract class AutoConfigurationPackages {
 	 */
 	private static final class PackageImports {
 
+		// 包名s
 		private final List<String> packageNames;
 
 		PackageImports(AnnotationMetadata metadata) {
+			// 获取被 @AutoConfigurationPackage 注解的类
 			AnnotationAttributes attributes = AnnotationAttributes
 				.fromMap(metadata.getAnnotationAttributes(AutoConfigurationPackage.class.getName(), false));
+			// 获取属性名为 basePackages 的包名
 			List<String> packageNames = new ArrayList<>(Arrays.asList(attributes.getStringArray("basePackages")));
+			// basePackageClasses 是 basePackages 的类型安全的替代方案
 			for (Class<?> basePackageClass : attributes.getClassArray("basePackageClasses")) {
 				packageNames.add(basePackageClass.getPackage().getName());
 			}
+			// 未配置 basePackages/basePackageClasses 属性，则扫描被 @SpringBootApplication 注解的类所在的包
 			if (packageNames.isEmpty()) {
 				packageNames.add(ClassUtils.getPackageName(metadata.getClassName()));
 			}
+			// 返回包名列表的不可修改视图
 			this.packageNames = Collections.unmodifiableList(packageNames);
 		}
 
